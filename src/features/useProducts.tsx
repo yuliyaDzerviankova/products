@@ -1,95 +1,8 @@
 import { useEffect, useState } from "react"
-import type { Product } from "../models/Product"
 import { useLazyQuery, useQuery } from "@apollo/client/react"
-import { gql } from "@apollo/client"
-
-const GET_PRODUCTS = gql`
-  query GetProducts($skip: Int!, $limit: Int!) {
-    productsData(skip: $skip, limit: $limit) @rest(
-      type: "ProductsResponse", path: "products?skip={args.skip}&limit={args.limit}"
-    ) {
-      products {
-        id
-        title
-        description
-        category
-        price
-        tags
-        discountPercentage
-        rating
-        stock
-        brand
-        sku
-        weight
-        thumbnail
-      }
-      total
-      limit
-      skip
-    }
-  }
-`
-
-const SEARCH_VALUE = gql`
-  query SearchProducts($value: String!) {
-    productsData(value: $value) @rest(
-      type: "ProductsResponse", path: "products/search?q={args.value}"
-    ) {
-      products {
-        id
-        title
-        description
-        category
-        price
-        tags
-        discountPercentage
-        rating
-        stock
-        brand
-        sku
-        weight
-        thumbnail
-      }
-      total
-      limit
-      skip
-    }
-  }
-`
-
-const GET_CATEGORIES = gql`
-  query GetCategories {
-    categories @rest(type: "Categories", path: "products/category-list")
-  }
-`
-
-const GET_PRODUCT_BY_CATEGORY = gql`
-  query GetProductByCategory($value: String!) {
-    productsData(value: $value) @rest(
-      type: "Products",
-      path: "products/category/{args.value}"
-    ) {
-      products {
-        id
-        title
-        description
-        category
-        price
-        tags
-        discountPercentage
-        rating
-        stock
-        brand
-        sku
-        weight
-        thumbnail
-      }
-      total
-      skip
-      limit
-    }
-  }
-`
+import type { ProductsVariables, Product } from "../models"
+import { GET_PRODUCTS, GET_CATEGORIES, GET_PRODUCT_BY_CATEGORY, SEARCH_VALUE } from "../schemas"
+import type { ProductsResponse } from "../models/Product"
 
 const ITEMS_PER_PAGE = 30
 
@@ -97,8 +10,9 @@ const useProducts = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [searchValue, setSearchValue] = useState("")
   const [categoryValue, setCategoryValue] = useState<string[]>([])
+  const [ratingValue, setRatingValue] = useState<string | null>(null)
 
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
+  const [filteredProducts, setFilteredProducts] = useState<Product[] | undefined>([])
   const [totalCount, setTotalCount] = useState<number>(0)
 
   const [mode, setMode] = useState<"idle" | "search" | "category">("idle")
@@ -108,7 +22,7 @@ const useProducts = () => {
 
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE) || 1
 
-  const { loading, error, data } = useQuery(GET_PRODUCTS, {
+  const { loading, error, data } = useQuery<ProductsResponse, ProductsVariables>(GET_PRODUCTS, {
     variables: {
       skip: currentSkip,
       limit: ITEMS_PER_PAGE
@@ -117,14 +31,14 @@ const useProducts = () => {
     fetchPolicy: "network-only"
   })
 
-  const { data: categoriesData } = useQuery(GET_CATEGORIES)
+  const { data: categoriesQueryResponse } = useQuery<{ categories: string[] }>(GET_CATEGORIES)
 
   const [
     runSearch,
     {
       loading: searchLoading,
       data: searchData
-    }] = useLazyQuery(SEARCH_VALUE, {
+    }] = useLazyQuery<ProductsResponse>(SEARCH_VALUE, {
       fetchPolicy: "network-only"
     })
 
@@ -132,12 +46,12 @@ const useProducts = () => {
     {
       loading: filterCategoriesLoading,
       data: filterCategoriesData
-    }] = useLazyQuery(GET_PRODUCT_BY_CATEGORY, {
+    }] = useLazyQuery<ProductsResponse>(GET_PRODUCT_BY_CATEGORY, {
       fetchPolicy: "network-only"
     })
 
     useEffect(() => {
-      if (mode === "idle") {
+      if (mode === "idle" && data) {
         setFilteredProducts(data?.productsData?.products)
         setTotalCount(data?.productsData?.total || 0)
       }
@@ -190,8 +104,21 @@ const useProducts = () => {
     runCategoriesFilter({ variables: { value: value[0] } })
   }
 
+  const sortByRating = (value: string | null) => {
+    setRatingValue(value)
+    if (value && filteredProducts) {
+      const sortedProducts = [...filteredProducts]
+      if (value === "more") {
+        setFilteredProducts(sortedProducts.sort((a, b) => b.rating - a.rating))
+      } else if (value === "less") {
+        setFilteredProducts(sortedProducts.sort((a, b) => a.rating - b.rating))
+      }
+    }
+  }
+
   const clearFilter = () => {
     setCategoryValue([])
+    setRatingValue("")
     setFilteredProducts(data?.productsData?.products)
   }
 
@@ -204,7 +131,7 @@ const useProducts = () => {
     setSearchValue,
     filteredProducts,
     totalCount,
-    categoriesData,
+    categoriesQueryResponse,
     error,
     showSkeleton,
     totalPages,
@@ -212,7 +139,11 @@ const useProducts = () => {
     validPage,
     loading,
     searchLoading,
-    clearFilter
+    setFilteredProducts,
+    sortByRating,
+    ratingValue,
+    setRatingValue,
+    clearFilter,
   }
 }
 

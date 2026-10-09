@@ -1,3 +1,5 @@
+import type { ProductDataResponse } from "./ProductResponse"
+
 type Product = {
   id: number
   title: string
@@ -14,4 +16,8 @@ type Product = {
   thumbnail: string
 }
 
+type ProductsResponse = ProductDataResponse<"productsData", "products", Product>
+
 export type { Product }
+
+export type { ProductsResponse }

@@ -13,7 +13,7 @@ const Search = ({ handleKeyDown, searchItems, setSearchValue }: Props) => {
   const { colorMode } = useColorMode()
 
   return (
-    <Flex gap="4">
+    <Flex gap="4" marginLeft="auto">
       <InputGroup startElement={<LuSearch />}>
         <Input
           background={colorMode === "light" ? "#C5C5C5" : "#829191"}

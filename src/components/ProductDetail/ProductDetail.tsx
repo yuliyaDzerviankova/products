@@ -6,6 +6,7 @@ import { LuArrowLeft, LuMoon, LuSun } from "react-icons/lu"
 import { useColorMode, useColorModeValue } from "../ui/color-mode"
 import { useState, useEffect } from "react"
 import { StarRating } from "../StarRating/StarRating"
+import type { Review } from "../../models"
 
 const GET_PRODUCT = gql`
   query GetProduct($id: ID!) {
@@ -36,7 +37,7 @@ const GET_PRODUCT = gql`
 const ProductDetail = () => {
   const { id } = useParams()
   const { colorMode, toggleColorMode } = useColorMode()
-  const [itemImage, setItemImage] = useState()
+  const [itemImage, setItemImage] = useState<string>("")
 
   const bgColor = useColorModeValue("#829191", "#2c423f")
   const separatorColor = useColorModeValue("#2C423F", "#829191")
@@ -70,7 +71,11 @@ const ProductDetail = () => {
             </IconButton>
           </Link>
 
-          <Box display="flex" alignSelf="flex-end">
+          <Box display="flex" alignSelf="flex-end" gap="6">
+            <Button>
+              Edit
+            </Button>
+
             <IconButton onClick={toggleColorMode} variant="ghost">
               {colorMode === "light" ? <LuMoon /> : <LuSun />}
             </IconButton>
@@ -93,7 +98,7 @@ const ProductDetail = () => {
           </GridItem>
           {product.images.length > 1 &&
             <GridItem  mb="30px" display="flex" colSpan={1}>
-              {product.images.map((image) => (
+              {product.images.map((image: string) => (
                 <Button
                   background={colorMode === "light" ? "#C5C5C5" : "#829191" }
                   mr="10px"
@@ -132,7 +137,7 @@ const ProductDetail = () => {
 
         <Heading mb={3}>Feedbacks ({product.reviews.length})</Heading>
         <Grid gridTemplateColumns={{ lg: "repeat(3, 1fr)", md: "repeat(1, 1fr)" }} gap="4">
-          {product.reviews.map(({rating, comment, date, reviewerName}, index) => {
+          {product.reviews.map(({rating, comment, date, reviewerName }: Review, index: number) => {
               return (
               <GridItem key={index} background={feedbackColor} p="15px" borderRadius="5px">
                 <Flex align="center" gap={3}>
