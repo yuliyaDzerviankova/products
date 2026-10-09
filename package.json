@@ -1,0 +1,35 @@
+{
+  "name": "products",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "lint": "oxlint",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "typescript": "~6.0.2",
+    "vite": "^8.3.0"
+  },
+  "dependencies": {
+    "@apollo/client": "^4.3.1",
+    "@chakra-ui/cli": "^3.37.0",
+    "@chakra-ui/react": "^3.37.0",
+    "@emotion/react": "^11.14.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "add": "^2.0.9",
+    "apollo-link-rest": "^0.10.0-rc.2",
+    "date-fns": "^4.4.0",
+    "graphql": "^17.0.2",
+    "next-themes": "^0.4.6",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-icons": "^5.7.0",
+    "react-router-dom": "^7.18.4",
+    "rxjs": "^7.8.2",
+    "snippet": "^0.1.0"
+  }
+}
